@@ -1,0 +1,135 @@
+#
+# Cookbook Name:: base_packages
+# Recipe:: default
+#
+# Copyright 2013, Example Com
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+
+
+tmpfile = '/tmp/test_cheking'
+template tmpfile do
+	source "tmp_test.erb"
+end
+
+bash_rc = '/home/tsunolab/.bashrc'
+template bash_rc do
+	source "bashrc.erb"
+end
+
+bash_profile = '/home/tsunolab/.bash_profile'
+template bash_profile do
+	source "bash_profile.erb"
+end
+
+
+hosts = '/etc/hosts'
+template hosts do
+	source "hosts.erb"
+end
+
+
+execute "initialize" do
+	command '. /home/tsunolab/.bashrc && . /home/tsunolab/.bash_profile'
+#	command '. /home/tsunolab/.bash_profile'
+end
+
+
+file tmpfile do
+	owner "tsunolab"
+	group "tsunolab"
+	mode	"0644"
+	notifies	:run,	resources(:execute => "initialize")
+end
+
+repos = '/etc/apt/sources.list.d/eucalyptus.list.test'
+template repos do
+	source "eucalyptus.list.erb"
+end
+
+
+resolv = '/etc/resolv.conf'
+template resolv do
+	source "resolv.conf.erb"
+end
+
+pub_key = '/tmp/c1240596-eucalyptus-release-key.pub'
+template pub_key do
+	source "c1240596-eucalyptus-release-key.pub.erb"
+end
+
+execute "apt_update" do
+        command 'apt-key add /tmp/c1240596-eucalyptus-release-key.pub'
+#        command 'yes | aptitude update'
+#        command 'yes | aptitude safe-upgrade'
+end
+
+#execute "aptupdate" do
+#	command 'apt-get update && apt-get safe-upgrade'
+#end
+
+file tmpfile do
+        owner "tsunolab"
+        group "tsunolab"
+        mode    "0644"
+        notifies        :run,   resources(:execute => "apt_update")
+#        notifies        :run,   resources(:execute => "aptupdate")
+end
+
+#%w{build-essential libssl-dev libreadline6-dev zlib1g-dev curl git-core}.each do |package_name|
+#  package package_name do
+#    action :install
+#  end
+#end
+
+
+
+
+
+#rgem = '/tmp/install.sh'
+#template rgem do
+#	source "install.sh.erb"
+#end
+
+#execute "ruby_install" do
+#	command '. /tmp/install.sh'
+#end
+
+#file tmpfile do
+#        notifies        :run,   resources(:execute => "ruby_install")
+#end
+
+
+
+#####  zettai sippai suru kara ` y yes | aptitude install -y eucalyptus-nc` de iku #####
+#%w{eucalyptus-nc}.each do |package_name|
+#  package package_name do
+#    action :install
+#  end
+#end
+
+execute "euca_install" do
+	command 'yes yes | aptitude install -y eucalyptus-nc&&yes | passwd eucalyptus | /etc/init.d/eucalyptus-nc start'
+end
+
+file tmpfile do
+	notifies        :run,   resources(:execute => "euca_install")
+end
+
+
+eucalyptus_conf = '/etc/eucalyptus/eucalyptus.conf'
+template eucalyptus_conf do
+	source "eucalyptus.conf.erb"
+end

@@ -1,0 +1,315 @@
+now_ip_addr	= "192.168.1.248"
+new_ip_addr	= ""
+host_name	= ""
+nc_name		= ""
+proxy 		= "http://proxy.tohtech.ac.jp:8080"
+nameserver 	= "192.168.1.1"
+domain		= "lab.tsunolab.net"
+
+repo_1		= "deb http://downloads.eucalyptus.com/software/euca2ools/2.1/ubuntu precise main"
+repo_2		= "deb http://downloads.eucalyptus.com/software/eucalyptus/3.1/ubuntu precise main"
+
+if_conf		= "/etc/network/interfaces"
+pkg_conf	= "/etc/apt/apt.conf"
+src_list	= "/etc/apt/sources.list"
+own_ipaddr	= ""
+profile		= "/etc/profile"
+resolv		= "/etc/resolv.conf"
+
+
+
+set :user, 'root'
+
+
+
+
+task :eucalyptus, :hosts => now_ip_addr do
+	run 'mkdir /root/creds || echo "do nothing"'
+	upload "/root/data/mycreds.zip","/root/creds/mycreds.zip"
+	upload "/root/data/interfaces","/tmp/interfaces"
+	upload "/root/data/ifcfg-eth0","/tmp/ifcfg-eth0"
+	upload "/root/data/ifcfg-br0","/tmp/ifcfg-br0"
+	upload "/root/data/chef-repo.tar","/root/chef-repo.tar"
+	upload "/root/data/yum.conf","/tmp/yum.conf"
+	run 'cp /tmp/interfaces /etc/network/interfaces || cp /tmp/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth0 && cp /tmp/ifcfg-br0 /etc/sysconfig/network-scripts/ifcfg-br0 || echo "do nothing"'
+
+	run 'echo Acquire::http::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf + '|| echo "do nothing"'
+	run 'echo Acquire::https::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf + '|| echo "do nothing"'
+	run 'echo Acquire::ftp::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf + '|| echo "do nothing"'
+	run 'cp /tmp/yum.conf /etc/yum.conf || echo "do nothing"'
+
+	run 'echo export https_proxy='     +   proxy   +  ' >> '  +   profile
+	run 'echo export http_proxy='      +   proxy   +  ' >> '  +   profile 
+	run 'echo export ftp_proxy='       +   proxy   +  ' >> '  +   profile 
+	run 'echo nameserver '        +   nameserver   +' >> '    +   resolv 
+	run 'echo domain     '        +   domain       +' >> '    +   resolv 
+	run '. '   +   profile
+	run '/etc/init.d/networking restart || /etc/init.d/network reload'
+
+	run 'aptitude update || echo "do nothing"'
+	run 'aptitude install -y libopenssl-ruby || echo "do nothing"'
+	run 'aptitude install -y libcurl4-openssl-dev || echo "do nothing"'
+	run 'aptitude install -y unzip || echo "do nothing"'
+	run 'aptitude install -y gcc cc make zlib zlib1g-dev || echo "do nothing"'
+	run 'aptitude install -y ruby || echo "do nothing"'
+	
+	run 'yum install -y http://downloads.eucalyptus.com/software/eucalyptus/3.1/centos/6/x86_64/eucalyptus-release-3.1.noarch.rpm || echo "do nothing"'
+	run 'yum install -y http://downloads.eucalyptus.com/software/euca2ools/2.1/centos/6/x86_64/euca2ools-release-2.1.noarch.rpm || echo "do nothing"'
+	run 'yum install -y http://downloads.eucalyptus.com/software/eucalyptus/3.1/centos/6/x86_64/epel-release-6.noarch.rpm || echo "do nothing"'
+	run 'yum install -y http://downloads.eucalyptus.com/software/eucalyptus/3.1/centos/6/x86_64/elrepo-release-6.noarch.rpm || echo "do nothing"'
+
+	run "unzip /root/creds/mycreds.zip"
+	run ". /root/eucarc"
+	run '/etc/init.d/networking restart || /etc/init.d/network restart'
+	run 'mkdir -p /etc/apt/sources.list.d/ || echo "do nothing"'
+
+	run 'yes | aptitude install rubygems || yum install -y rubygems'
+	run 'yum install -y ruby-devel || echo "do nothing"'
+	run 'yum install -y make || echo "do nothing"'
+	run 'yum install -y gcc || echo "do nothing"'
+	run 'yes | gem install chef -p http://proxy.tohtech.ac.jp:8080'
+	run 'cd /root'
+	run 'tar xfv /root/chef-repo.tar'
+	run 'chef-solo -c /root/chef-repo/.chef/solo.rb -j /root/chef-repo/.chef/chef.json'
+	run 'setenforce 0 && service eucalyptus-nc start && service eucalyptus-cloud && setenforce 1 || echo "do nothing"'
+	run '/etc/init.d/eucalyptus-nc restart' 
+	run '/etc/init.d/eucalyptus-cloud restart' 
+	run 'yes | aptitude safe-upgrade || yum update -y'
+end
+
+
+
+
+task :nc, :hosts => now_ip_addr do
+	run 'mkdir /root/creds || echo "do nothing"'
+	upload "/root/data/mycreds.zip","/root/creds/mycreds.zip"
+	upload "/root/data/interfaces","/tmp/interfaces"
+	upload "/root/data/ifcfg-eth0","/tmp/ifcfg-eth0"
+	upload "/root/data/ifcfg-br0","/tmp/ifcfg-br0"
+	upload "/root/data/chef-repo-nc.tar","/root/chef-repo.tar"
+	upload "/root/data/yum.conf","/tmp/yum.conf"
+	run 'cp /tmp/interfaces /etc/network/interfaces || cp /tmp/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth0 && cp /tmp/ifcfg-br0 /etc/sysconfig/network-scripts/ifcfg-br0 || echo "do nothing"'
+
+	run 'echo Acquire::http::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf + '|| echo "do nothing"'
+	run 'echo Acquire::https::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf + '|| echo "do nothing"'
+	run 'echo Acquire::ftp::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf + '|| echo "do nothing"'
+	run 'cp /tmp/yum.conf /etc/yum.conf || echo "do nothing"'
+
+	run 'echo export https_proxy='     +   proxy   +  ' >> '  +   profile
+	run 'echo export http_proxy='      +   proxy   +  ' >> '  +   profile 
+	run 'echo export ftp_proxy='       +   proxy   +  ' >> '  +   profile 
+	run 'echo nameserver '        +   nameserver   +' >> '    +   resolv 
+	run 'echo domain     '        +   domain       +' >> '    +   resolv 
+	run '. '   +   profile
+	run '/etc/init.d/networking restart || /etc/init.d/network reload'
+
+	run 'aptitude update || echo "do nothing"'
+	run 'aptitude install -y libopenssl-ruby || echo "do nothing"'
+	run 'aptitude install -y libcurl4-openssl-dev || echo "do nothing"'
+	run 'aptitude install -y unzip || echo "do nothing"'
+	run 'aptitude install -y gcc cc make zlib zlib1g-dev || echo "do nothing"'
+	run 'aptitude install -y ruby || echo "do nothing"'
+	
+	run 'yum install -y http://downloads.eucalyptus.com/software/eucalyptus/3.1/centos/6/x86_64/eucalyptus-release-3.1.noarch.rpm || echo "do nothing"'
+	run 'yum install -y http://downloads.eucalyptus.com/software/euca2ools/2.1/centos/6/x86_64/euca2ools-release-2.1.noarch.rpm || echo "do nothing"'
+	run 'yum install -y http://downloads.eucalyptus.com/software/eucalyptus/3.1/centos/6/x86_64/epel-release-6.noarch.rpm || echo "do nothing"'
+	run 'yum install -y http://downloads.eucalyptus.com/software/eucalyptus/3.1/centos/6/x86_64/elrepo-release-6.noarch.rpm || echo "do nothing"'
+
+	run "unzip /root/creds/mycreds.zip"
+	run ". /root/eucarc"
+	run '/etc/init.d/networking restart || /etc/init.d/network restart'
+	run 'mkdir -p /etc/apt/sources.list.d/ || echo "do nothing"'
+
+	run 'yes | aptitude install rubygems || yum install -y rubygems'
+	run 'yum install -y ruby-devel || echo "do nothing"'
+	run 'yum install -y make || echo "do nothing"'
+	run 'yum install -y gcc || echo "do nothing"'
+	run 'yes | gem install chef -p http://proxy.tohtech.ac.jp:8080'
+	run 'cd /root'
+	run 'tar xfv /root/chef-repo.tar'
+	run 'chef-solo -c /root/chef-repo/.chef/solo.rb -j /root/chef-repo/.chef/chef.json'
+	run 'setenforce 0 && service eucalyptus-nc start && service eucalyptus-cloud && setenforce 1 || echo "do nothing"'
+	run '/etc/init.d/eucalyptus-nc restart' 
+	run '/etc/init.d/eucalyptus-cloud restart' 
+	run 'yes | aptitude safe-upgrade || yum update -y'
+end
+
+
+
+
+task :walrus, :hosts => now_ip_addr do
+	run 'mkdir /root/creds || echo "do nothing"'
+	upload "/root/data/mycreds.zip","/root/creds/mycreds.zip"
+	upload "/root/data/interfaces","/tmp/interfaces"
+	upload "/root/data/ifcfg-eth0","/tmp/ifcfg-eth0"
+	upload "/root/data/ifcfg-br0","/tmp/ifcfg-br0"
+	upload "/root/data/chef-repo-walrus.tar","/root/chef-repo.tar"
+	upload "/root/data/yum.conf","/tmp/yum.conf"
+	run 'cp /tmp/interfaces /etc/network/interfaces || cp /tmp/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth0 && cp /tmp/ifcfg-br0 /etc/sysconfig/network-scripts/ifcfg-br0 || echo "do nothing"'
+
+	run 'echo Acquire::http::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf + '|| echo "do nothing"'
+	run 'echo Acquire::https::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf + '|| echo "do nothing"'
+	run 'echo Acquire::ftp::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf + '|| echo "do nothing"'
+	run 'cp /tmp/yum.conf /etc/yum.conf || echo "do nothing"'
+
+	run 'echo export https_proxy='     +   proxy   +  ' >> '  +   profile
+	run 'echo export http_proxy='      +   proxy   +  ' >> '  +   profile 
+	run 'echo export ftp_proxy='       +   proxy   +  ' >> '  +   profile 
+	run 'echo nameserver '        +   nameserver   +' >> '    +   resolv 
+	run 'echo domain     '        +   domain       +' >> '    +   resolv 
+	run '. '   +   profile
+	run '/etc/init.d/networking restart || /etc/init.d/network reload'
+
+	run 'aptitude update || echo "do nothing"'
+	run 'aptitude install -y libopenssl-ruby || echo "do nothing"'
+	run 'aptitude install -y libcurl4-openssl-dev || echo "do nothing"'
+	run 'aptitude install -y unzip || echo "do nothing"'
+	run 'aptitude install -y gcc cc make zlib zlib1g-dev || echo "do nothing"'
+	run 'aptitude install -y ruby || echo "do nothing"'
+	
+	run 'yum install -y http://downloads.eucalyptus.com/software/eucalyptus/3.1/centos/6/x86_64/eucalyptus-release-3.1.noarch.rpm || echo "do nothing"'
+	run 'yum install -y http://downloads.eucalyptus.com/software/euca2ools/2.1/centos/6/x86_64/euca2ools-release-2.1.noarch.rpm || echo "do nothing"'
+	run 'yum install -y http://downloads.eucalyptus.com/software/eucalyptus/3.1/centos/6/x86_64/epel-release-6.noarch.rpm || echo "do nothing"'
+	run 'yum install -y http://downloads.eucalyptus.com/software/eucalyptus/3.1/centos/6/x86_64/elrepo-release-6.noarch.rpm || echo "do nothing"'
+
+	run "unzip /root/creds/mycreds.zip"
+	run ". /root/eucarc"
+	run '/etc/init.d/networking restart || /etc/init.d/network restart'
+	run 'mkdir -p /etc/apt/sources.list.d/ || echo "do nothing"'
+
+	run 'yes | aptitude install rubygems || yum install -y rubygems'
+	run 'yum install -y ruby-devel || echo "do nothing"'
+	run 'yum install -y make || echo "do nothing"'
+	run 'yum install -y gcc || echo "do nothing"'
+	run 'yes | gem install chef -p http://proxy.tohtech.ac.jp:8080'
+	run 'cd /root'
+	run 'tar xfv /root/chef-repo.tar'
+	run 'chef-solo -c /root/chef-repo/.chef/solo.rb -j /root/chef-repo/.chef/chef.json'
+	run 'setenforce 0 && service eucalyptus-nc start && service eucalyptus-cloud && setenforce 1 || echo "do nothing"'
+	run '/etc/init.d/eucalyptus-nc restart' 
+	run '/etc/init.d/eucalyptus-cloud restart' 
+	run 'yes | aptitude safe-upgrade || yum update -y'
+end
+
+
+
+
+
+
+
+
+task :eucalyptus_back, :hosts => now_ip_addr do
+	run "mkdir /root/creds"
+	upload "/root/data/mycreds.zip","/root/creds/mycreds.zip"
+	upload "/root/data/interfaces",if_conf
+	upload "/root/data/chef-repo.tar","/root/chef-repo.tar"
+	run 'echo address '+   now_ip_addr    +' >> '+   if_conf
+	run 'echo Acquire::http::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf
+	run 'echo Acquire::https::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf
+	run 'echo Acquire::ftp::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf
+	run 'echo export https_proxy='     +   proxy   +  ' >> '  +   profile 
+	run 'echo export http_proxy='      +   proxy   +  ' >> '  +   profile 
+	run 'echo export ftp_proxy='       +   proxy   +  ' >> '  +   profile 
+	run 'echo nameserver '        +   nameserver   +' >> '    +   resolv 
+	run 'echo domain     '        +   domain       +' >> '    +   resolv 
+	run 'echo '+   repo_1       +' >> '+   src_list 
+	run 'echo '+   repo_2       +' >> '+   src_list 
+	run '. '   +   profile
+	run '/etc/init.d/networking restart'
+	run "aptitude update"
+	run 'aptitude install -y libopenssl-ruby'
+	run 'aptitude install -y libcurl4-openssl-dev'
+	run "aptitude install -y unzip"
+	run 'aptitude install -y gcc cc make zlib zlib1g-dev'
+	run 'aptitude install -y ruby'
+	run "unzip /root/creds/mycreds.zip"
+	run ". /root/eucarc"
+	run '/etc/init.d/networking restart'
+	run 'yes | aptitude install rubygems'
+	run 'yes | gem install chef -p http://proxy.tohtech.ac.jp:8080'
+	run 'cd /root'
+	run 'tar xfv /root/chef-repo.tar'
+	run 'chef-solo -c /root/chef-repo/.chef/solo.rb -j /root/chef-repo/.chef/chef.json'
+	run '/etc/init.d/eucalyptus-nc restart' 
+	run 'yes | aptitude safe-upgrade'
+end
+
+
+
+task :nc_back, :hosts => now_ip_addr do
+	run "mkdir /root/creds"
+	upload "/root/data/mycreds.zip","/root/creds/mycreds.zip"
+	upload "/root/data/interfaces",if_conf
+	upload "/root/data/chef-repo-nc.tar","/root/chef-repo.tar"
+	run 'echo address '+   now_ip_addr    +' >> '+   if_conf
+	run 'echo Acquire::http::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf
+	run 'echo Acquire::https::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf
+	run 'echo Acquire::ftp::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf
+	run 'echo export https_proxy='     +   proxy   +  ' >> '  +   profile 
+	run 'echo export http_proxy='      +   proxy   +  ' >> '  +   profile 
+	run 'echo export ftp_proxy='       +   proxy   +  ' >> '  +   profile 
+	run 'echo nameserver '        +   nameserver   +' >> '    +   resolv 
+	run 'echo domain     '        +   domain       +' >> '    +   resolv 
+	run 'echo '+   repo_1       +' >> '+   src_list 
+	run 'echo '+   repo_2       +' >> '+   src_list 
+	run '. '   +   profile
+	run '/etc/init.d/networking restart'
+	run 'aptitude install -y libopenssl-ruby'
+	run 'aptitude install -y libcurl4-openssl-dev'
+	run "aptitude update"
+	run 'aptitude install -y libopenssl-ruby'
+	run 'aptitude install -y libcurl4-openssl-dev'
+	run "aptitude install -y unzip"
+	run 'aptitude install -y gcc cc make zlib zlib1g-dev'
+	run 'aptitude install -y ruby'
+	run "unzip /root/creds/mycreds.zip"
+	run ". /root/eucarc"
+	run '/etc/init.d/networking restart'
+	run 'yes | aptitude install rubygems'
+	run 'yes | gem install chef -p http://proxy.tohtech.ac.jp:8080'
+	run 'cd /root'
+	run 'tar xfv /root/chef-repo.tar'
+	run 'chef-solo -c /root/chef-repo/.chef/solo.rb -j /root/chef-repo/.chef/chef.json'
+	run '/etc/init.d/eucalyptus-nc restart' 
+	run 'yes | aptitude safe-upgrade'
+end
+
+
+
+task :walrus_back, :hosts => now_ip_addr do
+	run "mkdir /root/creds"
+	upload "/root/data/mycreds.zip","/root/creds/mycreds.zip"
+	upload "/root/data/interfaces",if_conf
+	upload "/root/data/chef-repo-walrus.tar","/root/chef-repo.tar"
+	run 'echo address '+   now_ip_addr    +' >> '+   if_conf
+	run 'echo Acquire::http::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf
+	run 'echo Acquire::https::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf
+	run 'echo Acquire::ftp::proxy	\"'+   proxy   +'\"\; >> '+   pkg_conf
+	run 'echo export https_proxy='     +   proxy   +  ' >> '  +   profile 
+	run 'echo export http_proxy='      +   proxy   +  ' >> '  +   profile 
+	run 'echo export ftp_proxy='       +   proxy   +  ' >> '  +   profile 
+	run 'echo nameserver '        +   nameserver   +' >> '    +   resolv 
+	run 'echo domain     '        +   domain       +' >> '    +   resolv 
+	run 'echo '+   repo_1       +' >> '+   src_list 
+	run 'echo '+   repo_2       +' >> '+   src_list 
+	run '. '   +   profile
+	run '/etc/init.d/networking restart'
+	run 'aptitude install -y libopenssl-ruby'
+	run 'aptitude install -y libcurl4-openssl-dev'
+	run "aptitude update"
+	run 'aptitude install -y libopenssl-ruby'
+	run 'aptitude install -y libcurl4-openssl-dev'
+	run "aptitude install -y unzip"
+	run 'aptitude install -y gcc cc make zlib zlib1g-dev'
+	run 'aptitude install -y ruby'
+	run "unzip /root/creds/mycreds.zip"
+	run ". /root/eucarc"
+	run '/etc/init.d/networking restart'
+	run 'yes | aptitude install rubygems'
+	run 'yes | gem install chef -p http://proxy.tohtech.ac.jp:8080'
+	run 'cd /root'
+	run 'tar xfv /root/chef-repo.tar'
+	run 'chef-solo -c /root/chef-repo/.chef/solo.rb -j /root/chef-repo/.chef/chef.json'
+	run '/etc/init.d/eucalyptus-cloud restart' 
+	run 'yes | aptitude safe-upgrade'
+end
