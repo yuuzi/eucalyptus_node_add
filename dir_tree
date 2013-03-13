@@ -1,0 +1,134 @@
+tsunolab-P5E-V-HDMI eucalyptus_node_add # tree
+.
+├── data
+│   ├── chef-repo
+│   │   ├── LICENSE
+│   │   ├── README.md
+│   │   ├── Rakefile
+│   │   ├── certificates
+│   │   │   └── README.md
+│   │   ├── chefignore
+│   │   ├── config
+│   │   │   └── rake.rb
+│   │   ├── cookbooks
+│   │   │   ├── README.md
+│   │   │   ├── base_packages
+│   │   │   │   ├── README.md
+│   │   │   │   ├── attributes
+│   │   │   │   ├── definitions
+│   │   │   │   ├── files
+│   │   │   │   │   └── default
+│   │   │   │   ├── libraries
+│   │   │   │   ├── metadata.rb
+│   │   │   │   ├── providers
+│   │   │   │   ├── recipes
+│   │   │   │   │   └── default.rb
+│   │   │   │   ├── resources
+│   │   │   │   └── templates
+│   │   │   │       └── default
+│   │   │   │           ├── bash_profile.erb
+│   │   │   │           ├── bashrc.erb
+│   │   │   │           ├── c1240596-eucalyptus-release-key.pub.erb
+│   │   │   │           ├── eucalyptus.conf.erb
+│   │   │   │           ├── eucalyptus.list.erb
+│   │   │   │           ├── hosts.erb
+│   │   │   │           ├── install.sh.erb
+│   │   │   │           ├── resolv.conf.erb
+│   │   │   │           └── tmp_test.erb
+│   │   │   └── network
+│   │   │       ├── README.md
+│   │   │       ├── attributes
+│   │   │       ├── definitions
+│   │   │       ├── files
+│   │   │       │   └── default
+│   │   │       ├── libraries
+│   │   │       ├── metadata.rb
+│   │   │       ├── providers
+│   │   │       ├── recipes
+│   │   │       │   └── default.rb
+│   │   │       ├── resources
+│   │   │       └── templates
+│   │   │           └── default
+│   │   ├── data_bags
+│   │   │   └── README.md
+│   │   ├── environments
+│   │   │   └── README.md
+│   │   └── roles
+│   │       └── README.md
+│   ├── chef-repo-nc.tar
+│   ├── chef-repo-walrus.tar
+│   ├── chef-repo.tar
+│   ├── chef-repo.tar.buckup
+│   ├── ifcfg-br0
+│   ├── ifcfg-eth0
+│   ├── install.sh
+│   ├── interfaces
+│   ├── mycreds.zip
+│   ├── root
+│   │   └── nc_setup
+│   │       └── chef-repo
+│   │           ├── LICENSE
+│   │           ├── README.md
+│   │           ├── Rakefile
+│   │           ├── certificates
+│   │           │   └── README.md
+│   │           ├── chefignore
+│   │           ├── config
+│   │           │   └── rake.rb
+│   │           ├── cookbooks
+│   │           │   ├── README.md
+│   │           │   ├── base_packages
+│   │           │   │   ├── README.md
+│   │           │   │   ├── attributes
+│   │           │   │   ├── definitions
+│   │           │   │   ├── files
+│   │           │   │   │   └── default
+│   │           │   │   ├── libraries
+│   │           │   │   ├── metadata.rb
+│   │           │   │   ├── providers
+│   │           │   │   ├── recipes
+│   │           │   │   │   └── default.rb
+│   │           │   │   ├── resources
+│   │           │   │   └── templates
+│   │           │   │       └── default
+│   │           │   │           ├── bash_profile.erb
+│   │           │   │           ├── bashrc.erb
+│   │           │   │           ├── c1240596-eucalyptus-release-key.pub.erb
+│   │           │   │           ├── eucalyptus.conf.erb
+│   │           │   │           ├── eucalyptus.list.erb
+│   │           │   │           ├── hosts.erb
+│   │           │   │           ├── install.sh.erb
+│   │           │   │           ├── resolv.conf.erb
+│   │           │   │           └── tmp_test.erb
+│   │           │   └── network
+│   │           │       ├── README.md
+│   │           │       ├── attributes
+│   │           │       ├── definitions
+│   │           │       ├── files
+│   │           │       │   └── default
+│   │           │       ├── libraries
+│   │           │       ├── metadata.rb
+│   │           │       ├── providers
+│   │           │       ├── recipes
+│   │           │       │   └── default.rb
+│   │           │       ├── resources
+│   │           │       └── templates
+│   │           │           └── default
+│   │           ├── data_bags
+│   │           │   └── README.md
+│   │           ├── environments
+│   │           │   └── README.md
+│   │           └── roles
+│   │               └── README.md
+│   └── yum.conf
+└── sample
+    ├── Capfile
+    ├── Capfile.old
+    ├── Capfile.old.2
+    ├── base_packages
+    │   └── recipes
+    │       └── default.rb.old
+    └── config
+        └── deploy.rb
+
+

@@ -1,0 +1,8 @@
+DEVICE="eth0"
+NM_CONTROLLED="no"
+ONBOOT="yes"
+BRIDGE=br0
+#TYPE="Ethernet"
+#UUID="a67c7a15-3c19-4e8f-974c-b24c246bf61f"
+#BOOTPROTO="dhcp"
+#HWADDR="00:1D:60:ED:D9:B4"
