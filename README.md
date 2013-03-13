@@ -7,20 +7,20 @@ for example targetIPs,proxy,nameserver,domain,,,and more
 
 if you want to eucalyptus-nc & eucalyptus-walrus on Ubuntu12.04server
 you should be
-# apt-get install capistrano
-# cd hogehoge/sample
-# cap eucalyptus
+"# apt-get install capistrano"
+"# cd hogehoge/sample"
+"# cap eucalyptus"
 
 
 if you want to eucalyptus-nc on Ubuntu12.04server
 you should be
-# apt-get install capistrano
-# cd hogehoge/sample
-# cap nc
+"# apt-get install capistrano"
+"# cd hogehoge/sample"
+"# cap nc"
 
 
 if you want to eucalyptus-walrus on Ubuntu12.04server
 you should be
-# apt-get install capistrano
-# cd hogehoge/sample
-# cap walrus
+"# apt-get install capistrano"
+"# cd hogehoge/sample"
+"# cap walrus"
